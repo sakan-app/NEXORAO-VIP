@@ -84,7 +84,7 @@ html[dir=rtl] body{text-align:right}html[dir=rtl] .hero-copy{margin-left:0;margi
       const input = String(value ?? '');
       const clean = window.DOMPurify
         ? window.DOMPurify.sanitize(input, { USE_PROFILES: { html: true }, FORBID_TAGS: ['style','iframe','object','embed','form'], FORBID_ATTR: ['style','srcdoc'], ALLOW_DATA_ATTR: true })
-        : input.replace(/[&<>\"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));
+        : input.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;').split(String.fromCharCode(39)).join('&#39;');
       descriptor.set.call(this, clean);
     }
   });
