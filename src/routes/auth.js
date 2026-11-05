@@ -60,6 +60,7 @@ export default function authRouter(prisma) {
   router.post('/register', async (req, res, next) => {
     const parsed = signupSchema.safeParse(req.body);
     if (!parsed.success) return res.status(400).json({ error: 'Bitte geben Sie eine gültige E-Mail-Adresse und ein Passwort mit mindestens 12 Zeichen ein.' });
+    if (!mailer || !process.env.MAIL_FROM) return res.status(503).json({ error: 'E-Mail-Versand ist noch nicht konfiguriert. Bitte versuchen Sie es später erneut.' });
     try {
       const passwordHash = await hashPassword(parsed.data.password);
       const user = await prisma.user.create({ data: { email: parsed.data.email, passwordHash }, select: { id: true, email: true } });
