@@ -92,7 +92,7 @@
   }
 
   document.addEventListener('click', event => {
-    if (event.target.closest('[data-about-open]')) {
+    if (event.target.closest('[data-about-open], .nav a[href="#about"]')) {
       event.preventDefault();
       openOverlay('aboutOverlay');
     }
