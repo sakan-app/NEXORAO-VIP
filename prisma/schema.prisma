@@ -11,6 +11,8 @@ model User {
   id           String   @id @default(uuid()) @db.Uuid
   email        String   @unique
   passwordHash String
+  emailVerifiedAt DateTime?
+  verificationTokens EmailVerificationToken[]
   orders       Order[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -53,4 +55,15 @@ model OrderItem {
   product        Product @relation(fields: [productId], references: [id])
   quantity       Int
   unitPriceCents Int
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
 }
