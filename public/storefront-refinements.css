@@ -1,4 +1,17 @@
 /* NEXORA luxury storefront refinements */
+.footer-luxury{background:#0b0b0b;color:#d4af37;padding:60px 20px;border-top:1px solid rgba(212,175,55,.2);font-family:var(--serif)}
+.footer-luxury .footer-main{max-width:1200px;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
+.footer-luxury .footer-section{min-width:0}
+.footer-luxury .footer-title{color:#f3e5ab;border-bottom:1px solid rgba(212,175,55,.33);padding-bottom:10px;margin-bottom:15px}
+.footer-luxury .footer-section p{margin:8px 0;color:#ccc;font-size:12px}
+.footer-luxury .footer-section strong{color:#f3e5ab}
+.footer-luxury .footer-section a{color:#d4af37;text-decoration:none;overflow-wrap:anywhere}
+.footer-luxury .footer-section a:hover{color:#f3e5ab}
+.footer-luxury .mail-settings{margin-top:18px;padding-top:0;border-top:0}
+.footer-luxury .mail-settings h4{margin:14px 0 8px}
+.footer-luxury .footer-links{line-height:2}
+.footer-luxury .footer-brand-center{margin-top:36px}
+@media(max-width:1024px){.category-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.footer-luxury .footer-main{grid-template-columns:repeat(2,minmax(0,1fr))}.footer-luxury .footer-section:last-child{grid-column:1/-1}}
 .category-strip{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,1.7vw,24px);align-items:stretch}
 .category-tile{min-height:clamp(190px,19vw,270px);height:100%;padding:clamp(20px,2.4vw,34px);border-color:rgba(212,175,55,.32);background:linear-gradient(145deg,#1d1722,#0b090f);isolation:isolate;box-shadow:inset 0 0 35px rgba(212,175,55,.025)}
 .category-tile:before{background:radial-gradient(ellipse at 75% 12%,rgba(212,175,55,.19),transparent 62%);transition:opacity .35s,transform .5s}
@@ -33,5 +46,5 @@
 .account-message{min-height:24px;margin:12px 0 0;color:var(--champagne);font-size:12px}
 .account-message.error{color:#f0a0a0}
 .account-help{font-size:11px;color:var(--muted);margin:12px 0}
-@media(max-width:760px){.category-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.category-tile{min-height:190px}.luxury-modal{padding:30px 23px}.luxury-modal .close{right:17px;top:15px}}
+@media(max-width:760px){.category-strip{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.footer-luxury{padding:45px 18px}.footer-luxury .footer-main{grid-template-columns:1fr;gap:26px}.footer-luxury .footer-section:last-child{grid-column:auto}.category-tile{min-height:190px}.luxury-modal{padding:30px 23px}.luxury-modal .close{right:17px;top:15px}}
 @media(max-width:420px){.account-action .account-label,.cart-action .cart-label{display:none}.category-tile{min-height:165px;padding:17px}.category-tile strong{font-size:16px}}
