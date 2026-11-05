@@ -68,8 +68,8 @@
   if (typeof translations !== 'undefined') {
     if (translations.de) translations.de.imprintBody = imprint;
     if (translations.en) translations.en.imprintBody = '<h3>Legal notice</h3><p><strong>Operator:</strong> Ahmed Ismail Saed<br><strong>Address:</strong> Ehndorfer Str. 130, 24537 Neumünster, Germany</p><h3>Contact</h3><p>contact@digital-future.ai<br>info@digital-future.ai<br>server@digital-future.ai</p><h3>Mail client setup</h3><p>IMAP imaps.udag.de: 993 SSL/TLS, 143 STARTTLS<br>POP3 pops.udag.de: 995 SSL/TLS, 110 STARTTLS<br>SMTP smtps.udag.de: 465 SSL/TLS, 587 STARTTLS</p>';
-    if (translations.de) translations.de.privacyBody = translations.de.privacyBody.replace(/[A-Z0-9._%+-]+@nexoraonline\.de/gi/g, 'contact@digital-future.ai');
-    if (translations.en) translations.en.privacyBody = translations.en.privacyBody.replace(/[A-Z0-9._%+-]+@nexoraonline\.de/gi/g, 'contact@digital-future.ai');
+    if (translations.de) translations.de.privacyBody = translations.de.privacyBody.replace(/[A-Z0-9._%+-]+@nexoraonline\.de/gi, 'contact@digital-future.ai');
+    if (translations.en) translations.en.privacyBody = translations.en.privacyBody.replace(/[A-Z0-9._%+-]+@nexoraonline\.de/gi, 'contact@digital-future.ai');
   }
 
   document.addEventListener('click', event => {
