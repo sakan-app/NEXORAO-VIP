@@ -64,31 +64,12 @@
     headActions.append(account);
   }
 
-  const footer = $('footer');
-  if (footer) {
-    footer.querySelectorAll('a[href^="tel:"]').forEach(a => a.remove());
-    footer.querySelectorAll('a[href^="mailto:"]').forEach(a => a.remove());
-    const contact = document.createElement('div');
-    contact.className = 'mail-settings';
-    contact.innerHTML = '<h4>Unternehmenskontakt</h4><p><a href="mailto:contact@digital-future.ai">contact@digital-future.ai</a></p><p><a href="mailto:info@digital-future.ai">info@digital-future.ai</a></p><p><a href="mailto:server@digital-future.ai">server@digital-future.ai</a></p><h4>E-Mail-Clients Einrichtung (Outlook, Thunderbird, Apple Mail)</h4><p><strong>Posteingang / IMAP:</strong> imaps.udag.de · 993 SSL/TLS · 143 STARTTLS</p><p><strong>POP3:</strong> pops.udag.de · 995 SSL/TLS · 110 STARTTLS</p><p><strong>Postausgang / SMTP:</strong> smtps.udag.de · 465 SSL/TLS · 587 STARTTLS</p>';
-    const firstColumn = footer.querySelector('.footer-main > div');
-    if (firstColumn) firstColumn.append(contact);
-    const serviceColumn = footer.querySelectorAll('.footer-main > div')[1];
-    if (serviceColumn) {
-      serviceColumn.querySelectorAll('a[href^="tel:"],a[href^="mailto:"]').forEach(a => a.remove());
-      const links = serviceColumn.querySelector('.footer-links');
-      if (links) links.insertAdjacentHTML('beforeend', '<a href="mailto:contact@digital-future.ai">contact@digital-future.ai</a><a href="mailto:info@digital-future.ai">info@digital-future.ai</a><a href="mailto:server@digital-future.ai">server@digital-future.ai</a>');
-    }
-    const copyright = footer.querySelector('.copyright');
-    if (copyright) copyright.lastElementChild.textContent = 'Digital Future Stores Group';
-  }
-
   const imprint = '<h3>Angaben gemäß § 5 DDG</h3><p><strong>Inhaber / Betreiber:</strong> Ahmed Ismail Saed<br><strong>Anschrift:</strong> Ehndorfer Str. 130, 24537 Neumünster, Deutschland</p><h3>Kontakt</h3><p><strong>E-Mail:</strong> <a href="mailto:contact@digital-future.ai">contact@digital-future.ai</a><br><strong>E-Mail:</strong> <a href="mailto:info@digital-future.ai">info@digital-future.ai</a><br><strong>E-Mail:</strong> <a href="mailto:server@digital-future.ai">server@digital-future.ai</a></p><h3>E-Mail-Clients Einrichtung</h3><p><strong>IMAP:</strong> imaps.udag.de – Port 993 SSL/TLS oder 143 STARTTLS<br><strong>POP3:</strong> pops.udag.de – Port 995 SSL/TLS oder 110 STARTTLS<br><strong>SMTP:</strong> smtps.udag.de – Port 465 SSL/TLS oder 587 STARTTLS</p><h3>Verantwortlich für den Inhalt</h3><p>Ahmed Ismail Saed<br>Ehndorfer Str. 130, 24537 Neumünster, Deutschland</p>';
   if (typeof translations !== 'undefined') {
     if (translations.de) translations.de.imprintBody = imprint;
     if (translations.en) translations.en.imprintBody = '<h3>Legal notice</h3><p><strong>Operator:</strong> Ahmed Ismail Saed<br><strong>Address:</strong> Ehndorfer Str. 130, 24537 Neumünster, Germany</p><h3>Contact</h3><p>contact@digital-future.ai<br>info@digital-future.ai<br>server@digital-future.ai</p><h3>Mail client setup</h3><p>IMAP imaps.udag.de: 993 SSL/TLS, 143 STARTTLS<br>POP3 pops.udag.de: 995 SSL/TLS, 110 STARTTLS<br>SMTP smtps.udag.de: 465 SSL/TLS, 587 STARTTLS</p>';
-    if (translations.de) translations.de.privacyBody = translations.de.privacyBody.replace(/support@nexoraonline\.de/g, 'contact@digital-future.ai');
-    if (translations.en) translations.en.privacyBody = translations.en.privacyBody.replace(/support@nexoraonline\.de/g, 'contact@digital-future.ai');
+    if (translations.de) translations.de.privacyBody = translations.de.privacyBody.replace(/[A-Z0-9._%+-]+@nexoraonline\.de/gi/g, 'contact@digital-future.ai');
+    if (translations.en) translations.en.privacyBody = translations.en.privacyBody.replace(/[A-Z0-9._%+-]+@nexoraonline\.de/gi/g, 'contact@digital-future.ai');
   }
 
   document.addEventListener('click', event => {
