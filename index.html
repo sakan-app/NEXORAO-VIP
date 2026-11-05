@@ -176,6 +176,33 @@ img.hero-image{
     background-position:center center;
   }
 }
+
+/* Homepage: larger, uniform collection cards */
+.category-strip{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-auto-rows:minmax(230px,1fr);
+  gap:18px;
+}
+.category-tile{
+  min-height:230px;
+  padding:30px;
+}
+.category-tile strong{
+  font-size:clamp(19px,1.6vw,25px);
+}
+@media(max-width:760px){
+  .category-strip{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-auto-rows:minmax(190px,1fr);
+    gap:12px;
+  }
+  .category-tile{min-height:190px;padding:22px}
+}
+@media(max-width:420px){
+  .category-strip{grid-auto-rows:minmax(170px,1fr);gap:10px}
+  .category-tile{min-height:170px;padding:17px}
+}
+
 </style>
 </head>
 <body>
