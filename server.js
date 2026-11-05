@@ -10,6 +10,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import ordersRouter from './src/routes/orders.js';
+import authRouter from './src/routes/auth.js';
 
 for (const key of ['SESSION_SECRET', 'REDIS_URL', 'DATABASE_URL', 'APP_ORIGIN']) {
   if (!process.env[key]) throw new Error('Missing required environment variable: ' + key);
@@ -82,6 +83,8 @@ app.use('/api', (req, res, next) => {
   next();
 });
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60_000, limit: 12, standardHeaders: 'draft-7', legacyHeaders: false }));
+app.use('/api/auth', authRouter(prisma));
 app.use('/api/orders', ordersRouter(prisma));
 
 // A nonce is generated per response and applied to every inline script/style tag.
