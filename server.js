@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
-import { RedisStore } from 'connect-redis';
+import RedisStore from 'connect-redis';
 import { createClient } from 'redis';
 import { PrismaClient } from '@prisma/client';
 import helmet from 'helmet';
@@ -10,6 +10,7 @@ import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import ordersRouter from './src/routes/orders.js';
+import productsRouter from './src/routes/products.js';
 
 for (const key of ['SESSION_SECRET', 'REDIS_URL', 'DATABASE_URL', 'APP_ORIGIN']) {
   if (!process.env[key]) throw new Error('Missing required environment variable: ' + key);
@@ -82,6 +83,7 @@ app.use('/api', (req, res, next) => {
   next();
 });
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+app.use('/api/products', productsRouter(prisma));
 app.use('/api/orders', ordersRouter(prisma));
 
 // A nonce is generated per response and applied to every inline script/style tag.
@@ -95,7 +97,7 @@ app.get('/', async (_req, res, next) => {
     res.type('html').set('Cache-Control', 'no-store').send(html);
   } catch (err) { next(err); }
 });
-app.use('/assets', express.static(fileURLToPath(new URL('./public/', import.meta.url)), {
+app.use('/assets', express.static(fileURLToPath(new URL('./assets/', import.meta.url)), {
   dotfiles: 'deny', index: false, immutable: true, maxAge: '1y'
 }));
 app.use((err, _req, res, _next) => {

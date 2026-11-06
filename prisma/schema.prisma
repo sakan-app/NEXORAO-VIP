@@ -17,17 +17,52 @@ model User {
 }
 
 model Product {
-  id         String      @id @default(uuid()) @db.Uuid
-  name       String
-  priceCents Int
-  currency   String      @default("EUR")
-  stock      Int         @default(0)
-  active     Boolean     @default(true)
-  items      OrderItem[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id               String           @id @default(uuid()) @db.Uuid
+  name             String
+  priceCents       Int
+  currency         String           @default("EUR")
+  stock            Int              @default(0)
+  active           Boolean          @default(true)
+  // Storefront category id (index.html categoryConfig), description and pictures.
+  category         String?
+  description      String?
+  imageUrl         String?
+  images           String[]         @default([])
+  // CJ Dropshipping source: product id, supplier price and cheapest shipping to Germany (USD).
+  cjPid            String?          @unique
+  supplierPriceUsd Decimal?         @db.Decimal(12, 2)
+  shippingUsd      Decimal?         @db.Decimal(12, 2)
+  // Option names in CJ order, e.g. ["Color", "Size"].
+  variantDims      String[]         @default([])
+  variants         ProductVariant[]
+  items            OrderItem[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   @@index([active])
+  @@index([category, active])
+}
+
+// One orderable CJ variant (size/colour) with its own sale price.
+model ProductVariant {
+  id               String      @id @default(uuid()) @db.Uuid
+  productId        String      @db.Uuid
+  product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cjVid            String      @unique
+  sku              String?
+  options          Json
+  size             String?
+  color            String?
+  supplierPriceUsd Decimal     @db.Decimal(12, 2)
+  priceCents       Int
+  imageUrl         String?
+  weightG          Int?
+  active           Boolean     @default(true)
+  items            OrderItem[]
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([productId, active])
 }
 
 model Order {
@@ -46,11 +81,13 @@ model Order {
 }
 
 model OrderItem {
-  id             String  @id @default(uuid()) @db.Uuid
-  orderId        String  @db.Uuid
-  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId      String  @db.Uuid
-  product        Product @relation(fields: [productId], references: [id])
+  id             String          @id @default(uuid()) @db.Uuid
+  orderId        String          @db.Uuid
+  order          Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String          @db.Uuid
+  product        Product         @relation(fields: [productId], references: [id])
+  variantId      String?         @db.Uuid
+  variant        ProductVariant? @relation(fields: [variantId], references: [id])
   quantity       Int
   unitPriceCents Int
 }
