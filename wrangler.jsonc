@@ -23,11 +23,12 @@
     "WORKER_NAME": "nexora-cf",
     "SUPABASE_URL": "https://jxrobmaoouwycfhxpecn.supabase.co",
     "SUPABASE_ANON_KEY": "sb_publishable_cadDBtRzOnCEfik_nFkPbw_zwJatBoa",
-    // Mail from the NEXORA mailbox (SMTP_PASS is a Secret). SMTP_HOST/PORT depend on the mail provider.
-    "SMTP_HOST": "",
+    // Mail is sent through the UDAG mailbox info@digital-future.ai (SMTP_PASS is a Secret) until
+    // nexoraonline.de has its own sending mailbox; customer replies and the shop copy go to info@nexoraonline.de.
+    "SMTP_HOST": "smtps.udag.de",
     "SMTP_PORT": "465",
-    "SMTP_USER": "info@nexoraonline.de",
-    "MAIL_FROM": "NEXORA <info@nexoraonline.de>",
+    "SMTP_USER": "info@digital-future.ai",
+    "MAIL_FROM": "NEXORA <info@digital-future.ai>",
     "MAIL_TO_INFO": "info@nexoraonline.de",
     "PAYPAL_MODE": "live",
     // Seller on every invoice (§ 14 UStG). SHOP_ADDRESS lines are split on "|".
