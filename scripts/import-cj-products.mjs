@@ -17,7 +17,7 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const PER_CATEGORY = Number(process.argv.find(a => /^\d+$/.test(a)) || 12);
 const ONLY = process.argv.find(a => a.startsWith('--only='))?.slice(7);
 // Minimum supplier price (USD) per category: below these, CJ items rarely look premium.
-const MIN_SUPPLIER = { women: 25, men: 25, evening: 35, watches: 45, gifts: 20, accessories: 30 };
+const MIN_SUPPLIER = { women: 25, men: 25, evening: 35, watches: 45, gifts: 20, jewelry: 18, accessories: 30 };
 const MIN_SUPPLIER_PRICE = Number(process.env.MIN_SUPPLIER_PRICE ?? 0); // optional floor for all categories
 const minPrice = category => Math.max(MIN_SUPPLIER[category] ?? 25, MIN_SUPPLIER_PRICE);
 const MARKUP_PERCENT = Number(process.env.MARKUP_PERCENT ?? 150);
@@ -53,6 +53,11 @@ const SEARCHES = [
   { category: 'gifts', keyword: 'pearl necklace' },
   { category: 'gifts', keyword: 'moissanite ring' },
   { category: 'gifts', keyword: '18k gold plated earrings' },
+  { category: 'jewelry', keyword: '925 sterling silver bracelet' },
+  { category: 'jewelry', keyword: '925 sterling silver earrings' },
+  { category: 'jewelry', keyword: 'freshwater pearl earrings' },
+  { category: 'jewelry', keyword: 'moissanite necklace' },
+  { category: 'jewelry', keyword: '18k gold plated ring' },
   { category: 'accessories', keyword: 'genuine leather handbag' },
   { category: 'accessories', keyword: 'silk scarf' },
   { category: 'accessories', keyword: 'genuine leather belt' },
@@ -71,6 +76,7 @@ const MATERIALS = {
   evening: /\b(satin|silk|velvet|lace|sequin(ed)?|beaded|crystal|chiffon)\b/i,
   watches: /\b(automatic|mechanical|sapphire|tourbillon|stainless steel)\b/i,
   gifts: /\b(925|sterling|18k|14k|gold|pearl|moissanite|zircon|cubic zirconia)\b/i,
+  jewelry: /\b(925|sterling|18k|14k|gold|pearl|moissanite)\b/i,
   accessories: /\b(genuine leather|cowhide|calfskin|real leather|suede|silk|cashmere|mulberry)\b/i
 };
 const CATEGORY_WORDS = {
@@ -79,6 +85,7 @@ const CATEGORY_WORDS = {
   evening: /dress|gown/i,
   watches: /watch/i,
   gifts: /necklace|bracelet|earrings?|ring|pendant|brooch|cufflinks?/i,
+  jewelry: /necklace|bracelet|bangle|earrings?|\bring\b|pendant|brooch|anklet/i,
   accessories: /bag|handbag|scarf|shawl|belt|wallet|card holder|clutch|purse|tote/i
 };
 const fitsStore = (name, category) => !BRANDS.test(name) && !EXCLUDED.test(name) &&
@@ -211,9 +218,14 @@ const prisma = DRY_RUN ? null : new PrismaClient();
 const runStarted = new Date();
 const count = {};
 const usedPids = new Set();
+// Each search may fill only its share of the category, so a category mixes its searches
+// (bracelets, earrings, pearls ...) instead of filling up from the first one.
+const searchesIn = c => SEARCHES.filter(s => s.category === c).length;
 for (const { category, keyword } of SEARCHES.filter(s => !ONLY || s.category === ONLY)) {
   if ((count[category] || 0) >= PER_CATEGORY) continue;
-  for (let page = 1; page <= MAX_PAGES && (count[category] || 0) < PER_CATEGORY; page++) {
+  const share = Math.ceil(PER_CATEGORY / searchesIn(category));
+  const limit = Math.min(PER_CATEGORY, (count[category] || 0) + share);
+  for (let page = 1; page <= MAX_PAGES && (count[category] || 0) < limit; page++) {
     const url = `/product/listV2?page=${page}&size=100&keyWord=${encodeURIComponent(keyword)}`;
     const list = (await cj(url))?.content?.flatMap(c => c.productList || []) || [];
     const candidates = list
@@ -221,8 +233,13 @@ for (const { category, keyword } of SEARCHES.filter(s => !ONLY || s.category ===
       .filter(p => p.id && !usedPids.has(p.id) && p.name && /^[\x20-\x7E]+$/.test(p.name) && p.price >= minPrice(category) &&
         fitsStore(p.name, category) && /^https:\/\//.test(p.image || ''));
     for (const item of candidates) {
-      if ((count[category] || 0) >= PER_CATEGORY) break;
+      if ((count[category] || 0) >= limit) break;
       usedPids.add(item.id);
+      // A piece already shown in another category stays there (an upsert would move it).
+      if (prisma) {
+        const existing = await prisma.product.findUnique({ where: { cjPid: item.id }, select: { category: true, active: true } });
+        if (existing?.active && existing.category !== category) continue;
+      }
       try {
         const detail = await cj(`/product/query?pid=${item.id}`);
         const shipping = await shippingUsd(detail);
@@ -246,8 +263,8 @@ for (const { category, keyword } of SEARCHES.filter(s => !ONLY || s.category ===
   console.log(`${category}: ${count[category] || 0} so far ("${keyword}")`);
 }
 // A full run defines the catalogue: products from earlier runs that no longer pass the rules are hidden.
-if (prisma && !ONLY) {
-  const hidden = await prisma.product.updateMany({ where: { active: true, cjPid: { not: null }, updatedAt: { lt: runStarted } }, data: { active: false } });
+if (prisma) {
+  const hidden = await prisma.product.updateMany({ where: { active: true, cjPid: { not: null }, updatedAt: { lt: runStarted }, ...(ONLY ? { category: ONLY } : {}) }, data: { active: false } });
   console.log(`Hidden ${hidden.count} older products that this run did not import.`);
 }
 await prisma?.$disconnect();
