@@ -8,3 +8,5 @@ dist/
 npm-debug.log*
 graphify-out/
 review/
+.wrangler/
+.dev.vars

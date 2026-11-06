@@ -1,0 +1,50 @@
+// NEXORA on Cloudflare Workers: static storefront + payment API in one Worker (same setup as SakanVIP).
+// Secrets go in the Cloudflare dashboard (Settings -> Variables and Secrets, type Secret), never here:
+// SUPABASE_SERVICE_ROLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET,
+// SMTP_PASS, CJ_API_KEY.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nexora-cf",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-27",
+  "compatibility_flags": ["nodejs_compat"],
+  // Copies index.html and assets/ into dist/ before every dev run and deploy.
+  "build": { "command": "node scripts/build-assets.mjs", "watch_dir": "worker" },
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/health", "/", "/index.html"]
+  },
+  // 8 payment/withdrawal calls per minute per visitor and route.
+  "ratelimits": [
+    { "name": "LIMITER", "namespace_id": "1101", "simple": { "limit": 8, "period": 60 } }
+  ],
+  "vars": {
+    "WORKER_NAME": "nexora-cf",
+    "SUPABASE_URL": "https://jxrobmaoouwycfhxpecn.supabase.co",
+    "SUPABASE_ANON_KEY": "sb_publishable_cadDBtRzOnCEfik_nFkPbw_zwJatBoa",
+    // Mail from the NEXORA mailbox (SMTP_PASS is a Secret). SMTP_HOST/PORT depend on the mail provider.
+    "SMTP_HOST": "",
+    "SMTP_PORT": "465",
+    "SMTP_USER": "info@nexoraonline.de",
+    "MAIL_FROM": "NEXORA <info@nexoraonline.de>",
+    "MAIL_TO_INFO": "info@nexoraonline.de",
+    "PAYPAL_MODE": "live",
+    // Seller on every invoice (§ 14 UStG). SHOP_ADDRESS lines are split on "|".
+    // SHOP_VAT_RATE 0 = small business, no VAT shown (§ 19 UStG).
+    "SHOP_NAME": "NEXORA",
+    "SHOP_LEGAL_NAME": "NEXORA · Inhaber Ahmed Ismail Saed",
+    "SHOP_ADDRESS": "Ehndorfer Str. 130|24537 Neumünster|Deutschland",
+    "SHOP_TAX_ID": "Steuernummer: 544-208-174-435",
+    "SHOP_VAT_RATE": "0",
+    // CJ fulfilment (worker/cj.js), same rules as SakanVIP. CJ_AUTO_PAY "on" pays CJ from the wallet.
+    "CJ_AUTO_PAY": "off",
+    "CJ_IOSS_TYPE": "3",
+    "CJ_SANDBOX": "off",
+    "CJ_MAX_COST_SHARE": "0.6",
+    "CJ_LOW_BALANCE_USD": "100"
+  },
+  // Every 30 minutes: send paid orders to CJ, pay them (auto-pay on) and read tracking numbers.
+  "triggers": { "crons": ["*/30 * * * *"] },
+  "observability": { "enabled": true }
+}
