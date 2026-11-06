@@ -39,7 +39,7 @@
     "SHOP_TAX_ID": "Steuernummer: 544-208-174-435",
     "SHOP_VAT_RATE": "0",
     // CJ fulfilment (worker/cj.js), same rules as SakanVIP. CJ_AUTO_PAY "on" pays CJ from the wallet.
-    "CJ_AUTO_PAY": "off",
+    "CJ_AUTO_PAY": "on",
     "CJ_IOSS_TYPE": "3",
     "CJ_SANDBOX": "off",
     "CJ_MAX_COST_SHARE": "0.6",
