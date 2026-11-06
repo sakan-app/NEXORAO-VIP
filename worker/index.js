@@ -11,6 +11,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const EU_COUNTRIES = ['DE', 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'SE'];
 const emailOk = value => typeof value === 'string' && value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const shopName = env => env.SHOP_NAME || 'NEXORA';
+// Marks this shop's Stripe sessions; the Stripe account is shared with SakanVIP.
+const SHOP_KEY = 'nexora';
 
 const json = (body, status = 200, headers = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...headers } });
@@ -134,8 +136,9 @@ async function stripeSession(env, body, origin, user) {
   try {
     const items = await trustedCart(env, body?.items);
     const shipping = validateShipping(body?.shipping);
+    // The Stripe account is shared with other shops: `shop` marks NEXORA's sessions for the webhook.
     const metadata = {
-      user_id: user.id, shipping_name: shipping.name, shipping_street: shipping.street, shipping_city: shipping.city,
+      shop: SHOP_KEY, user_id: user.id, shipping_name: shipping.name, shipping_street: shipping.street, shipping_city: shipping.city,
       shipping_postal_code: shipping.postalCode, shipping_country: shipping.country, shipping_phone: shipping.phone
     };
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, { httpClient: Stripe.createFetchHttpClient() });
@@ -160,7 +163,8 @@ async function stripeSession(env, body, origin, user) {
       shipping_address_collection: { allowed_countries: EU_COUNTRIES },
       // Stripe collects the shipping address itself; it rejects a preset payment_intent_data.shipping
       // alongside it, so the address from the page only goes in the metadata.
-      payment_intent_data: { metadata },
+      // Card statements read "<ACCOUNT>* NEXORA" so customers recognise the charge.
+      payment_intent_data: { metadata, statement_descriptor_suffix: String(env.STATEMENT_SUFFIX || 'NEXORA').slice(0, 22) },
       metadata,
       success_url: `${origin}/?payment=success`,
       cancel_url: `${origin}/?payment=cancel`
@@ -299,6 +303,8 @@ async function stripeWebhook(env, request, ctx) {
     case 'checkout.session.completed':
     case 'checkout.session.async_payment_succeeded':
       if (event.data.object.payment_status !== 'paid') break; // delayed methods arrive as async_payment_succeeded
+      // Every shop on the shared Stripe account gets every event: only NEXORA's own sessions become orders here.
+      if (event.data.object.metadata?.shop !== SHOP_KEY) break;
       try {
         const order = await recordStripeOrder(env, stripe, event.data.object);
         // The CJ order runs after Stripe gets its answer; failures stay on the order and the cron retries.
