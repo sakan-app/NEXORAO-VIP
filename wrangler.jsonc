@@ -42,7 +42,7 @@
     "CJ_AUTO_PAY": "on",
     "CJ_IOSS_TYPE": "3",
     "CJ_SANDBOX": "off",
-    "CJ_MAX_COST_SHARE": "0.6",
+    "CJ_MAX_COST_SHARE": "0.7",
     "CJ_LOW_BALANCE_USD": "100"
   },
   // Every 30 minutes: send paid orders to CJ, pay them (auto-pay on) and read tracking numbers.
